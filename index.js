@@ -38,7 +38,7 @@ let persons = [
   },
   {
     id: 5,
-    name: "Maya",
+    name: "Maya Leete",
     number: "978-210-5908",
   },
 ];
