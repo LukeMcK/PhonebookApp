@@ -4,6 +4,18 @@ const app = express();
 const Person = require("./models/person");
 const morgan = require("morgan");
 const cors = require("cors");
+const {
+  TextCensor,
+  RegExpMatcher,
+  englishDataset,
+  englishRecommendedTransformers,
+} = require("obscenity");
+
+const matcher = new RegExpMatcher({
+  ...englishDataset.build(),
+  ...englishRecommendedTransformers,
+});
+const censor = new TextCensor();
 
 morgan.token("body", (req) => JSON.stringify(req.body));
 app.use(
@@ -68,8 +80,14 @@ app.delete("/api/persons/:id", (request, response, next) => {
 app.post("/api/persons", (request, response, next) => {
   const body = request.body;
 
-  if (body.name === undefined || body.number === undefined) {
-    return response.status(400).json({ error: "name or number missing" });
+  if (
+    body.name === undefined ||
+    body.number === undefined ||
+    matcher.hasMatch(body.name)
+  ) {
+    return response
+      .status(400)
+      .json({ error: "name or number missing or inappropriate" });
   }
 
   const person = new Person({
